@@ -7,9 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "demo:evaluate": "tsx scripts/evaluate-demo.ts",
+    "demo:evaluate": "tsx --env-file=.env scripts/evaluate-demo.ts",
     "typecheck": "tsc --noEmit",
-    "spike:aqua": "tsx scripts/spike-aqua.mts"
+    "spike:aqua": "tsx --env-file=.env scripts/spike-aqua.ts",
   },
   "dependencies": {
     "@privy-io/node": "^0.34.0",
