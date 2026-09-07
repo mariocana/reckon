@@ -144,7 +144,7 @@ export function compileMandateToPolicy(
 }
 
 export interface PrivyConfig {
-  appId: string;
+  appID: string;
   appSecret: string;
   walletId: string;
   address: Address;
@@ -167,7 +167,7 @@ export function privyConfigFromEnv(): PrivyConfig {
     throw new VenueError("uniswap", `missing Privy configuration: ${missing.join(", ")}`);
   }
 
-  return { appId: appId!, appSecret: appSecret!, walletId: walletId!, address: address! };
+  return { appID: appId!, appSecret: appSecret!, walletId: walletId!, address: address! };
 }
 
 export interface PrivyWalletClient {
