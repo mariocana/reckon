@@ -170,33 +170,51 @@ export function privyConfigFromEnv(): PrivyConfig {
 
 export interface PrivyWalletClient {
   wallets(): {
-    ethereum: {
-      sendTransaction(walletId: string, params: unknown): Promise<{ hash: string }>;
+    ethereum(): {
+      signTransaction(walletId: string, input: unknown): Promise<{ signed_transaction: string }>;
     };
   };
+}
+
+export interface BroadcastClient {
+  getTransactionCount(args: { address: Address }): Promise<number>;
+  estimateFeesPerGas(): Promise<{ maxFeePerGas?: bigint; maxPriorityFeePerGas?: bigint }>;
+  sendRawTransaction(args: { serializedTransaction: Hex }): Promise<Hex>;
 }
 
 export class PrivySigner implements Signer {
   constructor(
     readonly address: Address,
-    private readonly client: PrivyWalletClient,
+    private readonly privy: PrivyWalletClient,
     private readonly walletId: string,
-    private readonly chainId: number
+    private readonly chainId: number,
+    private readonly broadcaster: BroadcastClient,
+    private readonly gasLimit = 500_000n
   ) {}
 
   async sendTransaction(tx: { to: Address; data: Hex; value?: bigint }): Promise<Hex> {
-    const result = await this.client.wallets().ethereum.sendTransaction(this.walletId, {
-      caip2: `eip155:${this.chainId}`,
+    const nonce = await this.broadcaster.getTransactionCount({ address: this.address });
+    const fees = await this.broadcaster.estimateFeesPerGas();
+    const hex = (v: bigint) => `0x${v.toString(16)}`;
+
+    const signed = await this.privy.wallets().ethereum().signTransaction(this.walletId, {
       params: {
         transaction: {
           to: tx.to,
           data: tx.data,
-          value: tx.value ? `0x${tx.value.toString(16)}` : "0x0",
+          value: hex(tx.value ?? 0n),
           chain_id: this.chainId,
+          nonce,
+          gas_limit: hex(this.gasLimit),
+          max_fee_per_gas: hex(fees.maxFeePerGas ?? 1_000_000_000n),
+          max_priority_fee_per_gas: hex(fees.maxPriorityFeePerGas ?? 1_000_000n),
+          type: 2,
         },
       },
     });
 
-    return result.hash as Hex;
+    return this.broadcaster.sendRawTransaction({
+      serializedTransaction: signed.signed_transaction as Hex,
+    });
   }
 }
