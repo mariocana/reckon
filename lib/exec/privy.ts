@@ -92,14 +92,14 @@ export function compileMandateToPolicy(
         {
           field_source: "ethereum_calldata",
           abi: EXACT_INPUT_SINGLE_ABI,
-          field: "params.tokenOut",
+          field: "exactInputSingle.params.tokenOut",
           operator: "in",
           value: options.tokenAllowlist,
         },
         {
           field_source: "ethereum_calldata",
           abi: EXACT_INPUT_SINGLE_ABI,
-          field: "params.amountIn",
+          field: "exactInputSingle.params.amountIn",
           operator: "lte",
           value: spendCap.toString(),
         },
@@ -115,7 +115,7 @@ export function compileMandateToPolicy(
         {
           field_source: "ethereum_calldata",
           abi: ERC20_APPROVE_ABI,
-          field: "spender",
+          field: "approve.spender",
           operator: "in",
           value: routers,
         },
@@ -144,7 +144,7 @@ export function compileMandateToPolicy(
 }
 
 export interface PrivyConfig {
-  appID: string;
+  appId: string;
   appSecret: string;
   walletId: string;
   address: Address;
@@ -167,11 +167,11 @@ export function privyConfigFromEnv(): PrivyConfig {
     throw new VenueError("uniswap", `missing Privy configuration: ${missing.join(", ")}`);
   }
 
-  return { appID: appId!, appSecret: appSecret!, walletId: walletId!, address: address! };
+  return { appId: appId!, appSecret: appSecret!, walletId: walletId!, address: address! };
 }
 
 export interface PrivyWalletClient {
-  walletsService: {
+  wallets(): {
     ethereum: {
       sendTransaction(walletId: string, params: unknown): Promise<{ hash: string }>;
     };
@@ -187,7 +187,7 @@ export class PrivySigner implements Signer {
   ) {}
 
   async sendTransaction(tx: { to: Address; data: Hex; value?: bigint }): Promise<Hex> {
-    const result = await this.client.walletsService.ethereum.sendTransaction(this.walletId, {
+    const result = await this.client.wallets().ethereum.sendTransaction(this.walletId, {
       caip2: `eip155:${this.chainId}`,
       params: {
         transaction: {
