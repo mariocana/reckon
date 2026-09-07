@@ -13,15 +13,26 @@ export class GraphError extends Error {
 
 export const GRAPH_NETWORK = "base" as const;
 
-const TOKEN_API_URL = process.env.GRAPH_TOKEN_API_URL ?? "https://token-api.thegraph.com/v1";
+const TOKEN_API_URL = process.env.GRAPH_TOKEN_API_URL ?? "https://api.pinax.network/v1";
 const GATEWAY_URL = process.env.GRAPH_GATEWAY_URL ?? "https://gateway.thegraph.com/api";
 const UNISWAP_V3_BASE_SUBGRAPH =
-  process.env.UNISWAP_V3_BASE_SUBGRAPH_ID ?? "FUbEPQw1oMghy39fwWBFY5fE6MXPXZQtjncQy2cXdrNS";
+  process.env.UNISWAP_V3_BASE_SUBGRAPH_ID ?? "HMuAwufqZ1YCRmzL2SfHTVkzZovC9VL2UAKhjvRqKiR1";
 
-function apiKey(): string {
+function gatewayKey(): string {
   const key = process.env.GRAPH_API_KEY;
   if (!key) {
-    throw new GraphError("token-api", "GRAPH_API_KEY is not set");
+    throw new GraphError("subgraph", "GRAPH_API_KEY is not set");
+  }
+  return key;
+}
+
+function tokenApiKey(): string {
+  const key = process.env.GRAPH_TOKEN_API_KEY;
+  if (!key) {
+    throw new GraphError(
+      "token-api",
+      "GRAPH_TOKEN_API_KEY is not set — the Token API needs its own token, a Graph Studio key returns 401"
+    );
   }
   return key;
 }
@@ -56,7 +67,7 @@ interface TokenApiHolder {
 }
 
 async function tokenApi<T>(path: string, params: Record<string, string>): Promise<T[]> {
-  const key = apiKey();
+  const key = tokenApiKey();
   const url = new URL(`${TOKEN_API_URL}${path}`);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
 
@@ -121,7 +132,7 @@ export async function querySubgraph<T>(
   variables: Record<string, unknown> = {},
   subgraphId: string = UNISWAP_V3_BASE_SUBGRAPH
 ): Promise<T> {
-  const url = `${GATEWAY_URL}/${apiKey()}/subgraphs/id/${subgraphId}`;
+  const url = `${GATEWAY_URL}/${gatewayKey()}/subgraphs/id/${subgraphId}`;
 
   let res: Response;
   try {
