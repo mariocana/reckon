@@ -1,17 +1,22 @@
 {
-  "name": "my-next-app",
+  "name": "reckon",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "demo:evaluate": "tsx scripts/evaluate-demo.ts",
+    "typecheck": "tsc --noEmit",
+    "spike:aqua": "tsx scripts/spike-aqua.mts"
   },
   "dependencies": {
     "next": "16.3.4",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "viem": "^2.21.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -21,6 +26,8 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
     "tailwindcss": "^4",
+    "tsx": "^4.23.13",
     "typescript": "^5"
-  }
+  },
+  "description": "An agent that manages a treasury under a signed mandate it cannot forge."
 }
