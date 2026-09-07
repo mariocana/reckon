@@ -81,10 +81,12 @@ export function compileMandateToPolicy(
   const chainId = String(mandate.chainId);
   const spendCap = maxSpendUnits(mandate, options.spendTokenDecimals);
 
-  const rules: unknown[] = [
+  const signingMethods = ["eth_sendTransaction", "eth_signTransaction"] as const;
+
+  const rules: unknown[] = signingMethods.flatMap((method) => [
     {
-      name: "swap within the mandate",
-      method: "eth_sendTransaction",
+      name: `swap in mandate (${method})`,
+      method,
       action: "ALLOW",
       conditions: [
         { field_source: "ethereum_transaction", field: "chain_id", operator: "eq", value: chainId },
@@ -106,8 +108,8 @@ export function compileMandateToPolicy(
       ],
     },
     {
-      name: "approve the mandated router only",
-      method: "eth_sendTransaction",
+      name: `approve router (${method})`,
+      method,
       action: "ALLOW",
       conditions: [
         { field_source: "ethereum_transaction", field: "chain_id", operator: "eq", value: chainId },
@@ -121,13 +123,14 @@ export function compileMandateToPolicy(
         },
       ],
     },
-    {
-      name: "deny everything else",
-      method: "*",
-      action: "DENY",
-      conditions: [],
-    },
-  ];
+  ]);
+
+  rules.push({
+    name: "deny everything else",
+    method: "*",
+    action: "DENY",
+    conditions: [],
+  });
 
   return {
     name: `reckon mandate v${mandate.version}`,
@@ -138,6 +141,7 @@ export function compileMandateToPolicy(
       `§3 becomes a cap of ${spendCap} units of ${options.spendToken}; the mandate is denominated in USD, so this holds while the spend token is a dollar stablecoin.`,
       `§4 becomes an allowlist of ${options.tokenAllowlist.length} tokens, resolved off-chain from The Graph before the policy is written.`,
       `§6 becomes the router allowlist: ${routers.join(", ")}.`,
+      `Both eth_sendTransaction and eth_signTransaction are constrained; allowing only the former would let the agent sign here and broadcast elsewhere.`,
       `§1, §2 and §5 are portfolio-wide and cannot be expressed per-transaction; they stay with the evaluator.`,
     ],
   };
