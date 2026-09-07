@@ -1,8 +1,12 @@
 import {
   concatHex,
   createPublicClient,
+  decodeAbiParameters,
+  decodeEventLog,
   http,
+  keccak256,
   numberToHex,
+  parseAbi,
   size,
   slice as sliceHex,
   type Address,
@@ -238,6 +242,126 @@ export function decodeTakerTraitsAndData(packed: Hex) {
     isAToB: (flags & FLAG.isAToB) !== 0,
     allowPartialFill: (flags & FLAG.allowPartialFill) !== 0,
   };
+}
+
+export const AQUA_EVENTS = parseAbi([
+  "event Shipped(address maker, address app, bytes32 strategyHash, bytes strategy)",
+  "event Docked(address maker, address app, bytes32 strategyHash)",
+]);
+
+export const AQUA_REGISTRY_ABI = parseAbi([
+  "function rawBalances(address maker, address app, bytes32 strategyHash, address token) view returns (uint256)",
+]);
+
+const ORDER_ABI_PARAMS = [
+  {
+    type: "tuple",
+    components: [
+      { name: "maker", type: "address" },
+      { name: "traits", type: "uint256" },
+      { name: "data", type: "bytes" },
+    ],
+  },
+] as const;
+
+export function decodeStrategyAsOrder(strategy: Hex): Order {
+  const [tuple] = decodeAbiParameters(ORDER_ABI_PARAMS, strategy);
+  return tuple as unknown as Order;
+}
+
+export interface ShippedStrategy {
+  order: Order;
+  app: Address;
+  strategyHash: Hex;
+  blockNumber: bigint;
+}
+
+export interface FindShippedOrdersOptions {
+  fromBlock?: bigint;
+  toBlock?: bigint;
+  blocksPerRequest?: bigint;
+  maxRequests?: number;
+  limit?: number;
+}
+
+export async function findShippedOrders(
+  client: PublicClient,
+  options: FindShippedOrdersOptions = {}
+): Promise<ShippedStrategy[]> {
+  const head = options.toBlock ?? (await client.getBlockNumber());
+  const span = options.blocksPerRequest ?? 10_000n;
+  const maxRequests = options.maxRequests ?? 12;
+  const limit = options.limit ?? 25;
+  const floor = options.fromBlock ?? 0n;
+
+  const found: ShippedStrategy[] = [];
+  const docked = new Set<Hex>();
+  let to = head;
+
+  for (let i = 0; i < maxRequests && found.length < limit && to > floor; i++) {
+    const from = to - span + 1n > floor ? to - span + 1n : floor;
+    const logs = await client.getLogs({
+      address: AQUA_ADDRESSES.registry,
+      fromBlock: from,
+      toBlock: to,
+    });
+
+    for (const log of logs) {
+      let parsed;
+      try {
+        parsed = decodeEventLog({ abi: AQUA_EVENTS, data: log.data, topics: log.topics });
+      } catch {
+        continue;
+      }
+
+      if (parsed.eventName === "Docked") {
+        docked.add((parsed.args as { strategyHash: Hex }).strategyHash);
+        continue;
+      }
+
+      const args = parsed.args as unknown as {
+        maker: Address;
+        app: Address;
+        strategyHash: Hex;
+        strategy: Hex;
+      };
+
+      if (keccak256(args.strategy) !== args.strategyHash) continue;
+
+      let order: Order;
+      try {
+        order = decodeStrategyAsOrder(args.strategy);
+      } catch {
+        continue;
+      }
+
+      if (order.maker.toLowerCase() !== args.maker.toLowerCase()) continue;
+
+      found.push({
+        order,
+        app: args.app,
+        strategyHash: args.strategyHash,
+        blockNumber: log.blockNumber ?? 0n,
+      });
+    }
+
+    to = from - 1n;
+  }
+
+  return found.filter((s) => !docked.has(s.strategyHash));
+}
+
+export function makerBalance(
+  client: PublicClient,
+  strategy: ShippedStrategy,
+  token: Address
+): Promise<bigint> {
+  return client.readContract({
+    address: AQUA_ADDRESSES.registry,
+    abi: AQUA_REGISTRY_ABI,
+    functionName: "rawBalances",
+    args: [strategy.order.maker, strategy.app, strategy.strategyHash, token],
+  });
 }
 
 export interface AquaSwapRequest extends SwapRequest {
