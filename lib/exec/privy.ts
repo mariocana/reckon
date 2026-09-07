@@ -125,13 +125,6 @@ export function compileMandateToPolicy(
     },
   ]);
 
-  rules.push({
-    name: "deny everything else",
-    method: "*",
-    action: "DENY",
-    conditions: [],
-  });
-
   return {
     name: `reckon mandate v${mandate.version}`,
     chain_type: "ethereum",
@@ -141,6 +134,7 @@ export function compileMandateToPolicy(
       `§3 becomes a cap of ${spendCap} units of ${options.spendToken}; the mandate is denominated in USD, so this holds while the spend token is a dollar stablecoin.`,
       `§4 becomes an allowlist of ${options.tokenAllowlist.length} tokens, resolved off-chain from The Graph before the policy is written.`,
       `§6 becomes the router allowlist: ${routers.join(", ")}.`,
+      `Privy denies by default: anything no rule allows is refused. A catch-all DENY rule must NOT be added — a matching DENY overrides every ALLOW.`,
       `Both eth_sendTransaction and eth_signTransaction are constrained; allowing only the former would let the agent sign here and broadcast elsewhere.`,
       `§1, §2 and §5 are portfolio-wide and cannot be expressed per-transaction; they stay with the evaluator.`,
     ],
