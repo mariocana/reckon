@@ -1,0 +1,257 @@
+[
+  {
+    "id": "rcpt_0001",
+    "createdAt": "2026-09-09T11:00:00.928Z",
+    "mandateHash": "0xe20d444e4fecdd0d8d1de4eec6ebc43fc503345ce151a16d999dd43a5f917f46",
+    "trigger": "weekly rebalance: WETH is underweight",
+    "observation": {
+      "source": "thegraph",
+      "queriedAt": "2026-09-09T10:59:39.835Z",
+      "risk": {
+        "token": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "firstSeenAt": "2023-08-07T16:07:29.000Z",
+        "ageDays": 1128.7841203703704,
+        "sustainedLiquidityUsd": 154989899.88085005,
+        "holderConcentrationPct": 52.95643058920234,
+        "holderConcentrationExContractsPct": 0.9344293959060695,
+        "contractsInTopHolders": 9,
+        "source": "thegraph",
+        "queriedAt": "2026-09-09T10:56:47.477Z"
+      },
+      "poolsSeen": 20,
+      "bestPoolTvlUsd": 33998209976.017776
+    },
+    "proposal": {
+      "kind": "buy",
+      "token": "0x4200000000000000000000000000000000000006",
+      "symbol": "WETH",
+      "amountUsd": 5,
+      "venue": "uniswap",
+      "rationale": "WETH sits below its target weight."
+    },
+    "verdict": {
+      "kind": "allow",
+      "mandateHash": "0xe20d444e4fecdd0d8d1de4eec6ebc43fc503345ce151a16d999dd43a5f917f46",
+      "checked": [
+        "\u00a70.validity",
+        "\u00a71.reserve",
+        "\u00a72.concentration",
+        "\u00a73.tradeSize",
+        "\u00a74.universe",
+        "\u00a75.cadence",
+        "\u00a76.venue"
+      ]
+    },
+    "authorization": {
+      "layer": "privy-policy",
+      "outcome": "granted",
+      "signer": "0xc75C049d926CD7cF65B3232C0c3Ca3a85F0Fc597",
+      "detail": "the policy allowed the approval and the swap"
+    },
+    "execution": {
+      "venue": "uniswap",
+      "txHash": "0xd51f845fd26fefec1231a80fab909c381173e97c878391658a9e932ff1994de0",
+      "feeTier": 100,
+      "sellAmount": "5000000",
+      "buyAmount": "2010166009907869",
+      "minBuyAmount": "1990064349808790",
+      "status": "success"
+    },
+    "outcome": null
+  },
+  {
+    "id": "rcpt_0002",
+    "createdAt": "2026-09-09T11:00:34.713Z",
+    "mandateHash": "0xe20d444e4fecdd0d8d1de4eec6ebc43fc503345ce151a16d999dd43a5f917f46",
+    "trigger": "flagged by the community",
+    "observation": {
+      "source": "thegraph",
+      "queriedAt": "2026-09-09T11:00:34.710Z",
+      "risk": {
+        "token": "0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed",
+        "symbol": "DEGEN",
+        "firstSeenAt": "2024-01-07T19:30:45.000Z",
+        "ageDays": 975.6419212962963,
+        "sustainedLiquidityUsd": 493160.8425527177,
+        "holderConcentrationPct": 61.42254428944632,
+        "holderConcentrationExContractsPct": 21.87963565961946,
+        "contractsInTopHolders": 5,
+        "source": "thegraph",
+        "queriedAt": "2026-09-09T10:55:09.561Z"
+      },
+      "poolsSeen": 20,
+      "bestPoolTvlUsd": 1044609.4469303864
+    },
+    "proposal": {
+      "kind": "buy",
+      "token": "0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed",
+      "symbol": "DEGEN",
+      "amountUsd": 5,
+      "venue": "uniswap",
+      "rationale": "Trending on socials."
+    },
+    "verdict": {
+      "kind": "deny",
+      "mandateHash": "0xe20d444e4fecdd0d8d1de4eec6ebc43fc503345ce151a16d999dd43a5f917f46",
+      "checked": [
+        "\u00a70.validity",
+        "\u00a71.reserve",
+        "\u00a72.concentration",
+        "\u00a73.tradeSize",
+        "\u00a74.universe",
+        "\u00a75.cadence",
+        "\u00a76.venue"
+      ],
+      "violations": [
+        {
+          "clause": "\u00a74.universe",
+          "severity": "hard",
+          "explain": "DEGEN liquidity fell to $493,160.84 within the window \u2014 thinner than the mandate allows.",
+          "observed": "$493,160.84",
+          "limit": ">= $2,000,000"
+        }
+      ]
+    },
+    "authorization": {
+      "layer": "none",
+      "outcome": "refused",
+      "signer": null,
+      "detail": "the mandate refuses this action"
+    },
+    "execution": null,
+    "outcome": null
+  },
+  {
+    "id": "rcpt_0003",
+    "createdAt": "2026-09-09T11:00:53.827Z",
+    "mandateHash": "0xe20d444e4fecdd0d8d1de4eec6ebc43fc503345ce151a16d999dd43a5f917f46",
+    "trigger": "realignment past the concentration ceiling",
+    "observation": {
+      "source": "thegraph",
+      "queriedAt": "2026-09-09T11:00:53.824Z",
+      "risk": {
+        "token": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "firstSeenAt": "2023-08-07T16:07:29.000Z",
+        "ageDays": 1128.7841203703704,
+        "sustainedLiquidityUsd": 154989899.88085005,
+        "holderConcentrationPct": 52.95643058920234,
+        "holderConcentrationExContractsPct": 0.9344293959060695,
+        "contractsInTopHolders": 9,
+        "source": "thegraph",
+        "queriedAt": "2026-09-09T10:56:47.477Z"
+      },
+      "poolsSeen": 20,
+      "bestPoolTvlUsd": 33998209976.017776
+    },
+    "proposal": {
+      "kind": "buy",
+      "token": "0x4200000000000000000000000000000000000006",
+      "symbol": "WETH",
+      "amountUsd": 12,
+      "venue": "uniswap",
+      "rationale": "Close the whole WETH gap in one move."
+    },
+    "verdict": {
+      "kind": "escalate",
+      "mandateHash": "0xe20d444e4fecdd0d8d1de4eec6ebc43fc503345ce151a16d999dd43a5f917f46",
+      "checked": [
+        "\u00a70.validity",
+        "\u00a71.reserve",
+        "\u00a72.concentration",
+        "\u00a73.tradeSize",
+        "\u00a74.universe",
+        "\u00a75.cadence",
+        "\u00a76.venue"
+      ],
+      "violations": [
+        {
+          "clause": "\u00a72.concentration",
+          "severity": "soft",
+          "explain": "The action would put 34.00% of the treasury into WETH, above the single-asset ceiling.",
+          "observed": "34.00%",
+          "limit": "<= 15.00%"
+        }
+      ]
+    },
+    "authorization": {
+      "layer": "human-escalation",
+      "outcome": "pending",
+      "signer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "detail": "beyond the mandate \u2014 the owner has to authorise it"
+    },
+    "execution": null,
+    "outcome": null
+  },
+  {
+    "id": "rcpt_0004",
+    "createdAt": "2026-09-09T11:01:04.907Z",
+    "mandateHash": "0xe20d444e4fecdd0d8d1de4eec6ebc43fc503345ce151a16d999dd43a5f917f46",
+    "trigger": "realignment, with the owner's signature",
+    "observation": {
+      "source": "thegraph",
+      "queriedAt": "2026-09-09T11:00:57.851Z",
+      "risk": {
+        "token": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "firstSeenAt": "2023-08-07T16:07:29.000Z",
+        "ageDays": 1128.7841203703704,
+        "sustainedLiquidityUsd": 154989899.88085005,
+        "holderConcentrationPct": 52.95643058920234,
+        "holderConcentrationExContractsPct": 0.9344293959060695,
+        "contractsInTopHolders": 9,
+        "source": "thegraph",
+        "queriedAt": "2026-09-09T10:56:47.477Z"
+      },
+      "poolsSeen": 20,
+      "bestPoolTvlUsd": 33998209976.017776
+    },
+    "proposal": {
+      "kind": "buy",
+      "token": "0x4200000000000000000000000000000000000006",
+      "symbol": "WETH",
+      "amountUsd": 12,
+      "venue": "uniswap",
+      "rationale": "Close the whole WETH gap in one move."
+    },
+    "verdict": {
+      "kind": "escalate",
+      "mandateHash": "0xe20d444e4fecdd0d8d1de4eec6ebc43fc503345ce151a16d999dd43a5f917f46",
+      "checked": [
+        "\u00a70.validity",
+        "\u00a71.reserve",
+        "\u00a72.concentration",
+        "\u00a73.tradeSize",
+        "\u00a74.universe",
+        "\u00a75.cadence",
+        "\u00a76.venue"
+      ],
+      "violations": [
+        {
+          "clause": "\u00a72.concentration",
+          "severity": "soft",
+          "explain": "The action would put 34.00% of the treasury into WETH, above the single-asset ceiling.",
+          "observed": "34.00%",
+          "limit": "<= 15.00%"
+        }
+      ]
+    },
+    "authorization": {
+      "layer": "human-escalation",
+      "outcome": "granted",
+      "signer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "detail": "override 0xbf729c5f5796\u2026 signed by the owner; policy widened for this action"
+    },
+    "execution": {
+      "venue": "uniswap",
+      "txHash": "0x1a669f7819b3cddf54843c065bedda727489dce8bf4190c87c763cacf44d6a11",
+      "feeTier": 100,
+      "sellAmount": "12000000",
+      "buyAmount": "4824379408467523",
+      "minBuyAmount": "4776135614382847",
+      "status": "success"
+    },
+    "outcome": null
+  }
+]
