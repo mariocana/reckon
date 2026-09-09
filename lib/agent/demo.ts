@@ -107,7 +107,35 @@ export function forkClient(): PublicClient {
   }) as PublicClient;
 }
 
-export async function runScenario(id: ScenarioId): Promise<Receipt> {
+export async function buildDemoOverride(
+  mandate: Mandate,
+  action: ProposedAction
+): Promise<SignedOverride> {
+  const owner = demoOwner();
+  const doc = overrideSchema.parse({
+    mandateHash: mandateHash(mandate),
+    owner: owner.address,
+    agent: mandate.agent,
+    token: action.token,
+    kind: action.kind,
+    maxAmountUsd: 15,
+    venue: action.venue,
+    clauses: ["§2.concentration"],
+    issuedAt: new Date(Date.now() - 60_000).toISOString(),
+    expiresAt: new Date(Date.now() + 3600_000).toISOString(),
+    nonce: `demo-${Date.now()}`,
+  });
+
+  return {
+    override: doc,
+    signature: await owner.signTypedData(overrideTypedData(doc, mandate.chainId)),
+  };
+}
+
+export async function runScenario(
+  id: ScenarioId,
+  presetOverride?: SignedOverride
+): Promise<Receipt> {
   const client = forkClient();
   const privy = new PrivyClient({
     appId: process.env.PRIVY_APP_ID!,
@@ -124,25 +152,7 @@ export async function runScenario(id: ScenarioId): Promise<Receipt> {
   let policyAdmin: PolicyAdmin | undefined;
 
   if (id === "authorised") {
-    const owner = demoOwner();
-    const doc = overrideSchema.parse({
-      mandateHash: mandateHash(mandate),
-      owner: owner.address,
-      agent,
-      token: action.token,
-      kind: action.kind,
-      maxAmountUsd: 15,
-      venue: action.venue,
-      clauses: ["§2.concentration"],
-      issuedAt: new Date(Date.now() - 60_000).toISOString(),
-      expiresAt: new Date(Date.now() + 3600_000).toISOString(),
-      nonce: `demo-${Date.now()}`,
-    });
-
-    override = {
-      override: doc,
-      signature: await owner.signTypedData(overrideTypedData(doc, mandate.chainId)),
-    };
+    override = presetOverride ?? (await buildDemoOverride(mandate, action));
 
     policyAdmin = {
       walletId,

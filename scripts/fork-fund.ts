@@ -85,6 +85,32 @@ if (isTenderly) {
 
   await client.waitForTransactionReceipt({ hash });
   await rpc(ADMIN, "anvil_stopImpersonatingAccount", [donor]);
+
+  await rpc(ADMIN, "anvil_impersonateAccount", [target]);
+  const agent = createWalletClient({ chain: base, transport: http(FORK), account: target });
+  let cleared = 0;
+
+  for (const token of RESET_TO_ZERO) {
+    const held = await client.readContract({
+      address: token,
+      abi: erc20,
+      functionName: "balanceOf",
+      args: [target],
+    });
+    if (held === 0n) continue;
+
+    const away = await agent.writeContract({
+      address: token,
+      abi: erc20,
+      functionName: "transfer",
+      args: ["0x000000000000000000000000000000000000dEaD", held],
+    });
+    await client.waitForTransactionReceipt({ hash: away });
+    cleared++;
+  }
+
+  await rpc(ADMIN, "anvil_stopImpersonatingAccount", [target]);
+  console.log(`azzerati ${cleared} token non-stable, il portafoglio riparte pulito`);
 }
 
 const final = await client.readContract({
