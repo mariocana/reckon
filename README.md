@@ -69,6 +69,22 @@ Uniswap v3 on Base, through `SwapRouter02`.
 
 The subgraph proposes a fee tier, ranked by TVL. It is not trusted with the price: reckon quotes **all four tiers in parallel** through QuoterV2 and takes the best fill. On WETH/USDC the highest-TVL pool (0.3%) loses to the 0.01% pool by ~0.6%, and the winner flips to 0.05% around $5,000. The subgraph narrows the search and leaves an audit trail; the quoter decides.
 
+### Where the Uniswap integration lives
+
+| what | where | contract on Base |
+|---|---|---|
+| addresses | [`lib/exec/uniswap.ts:14-18`](lib/exec/uniswap.ts#L14-L18) | SwapRouter02 `0x2626664c2603336E57B271c5C0b26F421741e481`<br>QuoterV2 `0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a`<br>V3Factory `0x33128a8fC17869897dcE68Ed026d694621f6FDfD` |
+| quote one fee tier | [`lib/exec/uniswap.ts:58`](lib/exec/uniswap.ts#L58) `quoteAtFee` | `QuoterV2.quoteExactInputSingle`, called through `simulateContract` because it reverts internally |
+| quote all tiers, take the best | [`lib/exec/uniswap.ts:76`](lib/exec/uniswap.ts#L76) `quote` | the 0.6% improvement above comes from here |
+| execute the swap | [`lib/exec/uniswap.ts:137`](lib/exec/uniswap.ts#L137) `execute` | `SwapRouter02.exactInputSingle`, with the ERC-20 approval when the allowance is short |
+| pools for one token | [`lib/data/graph.ts:201`](lib/data/graph.ts#L201) `POOLS_QUERY` | v3 subgraph — token age from the oldest `createdAtTimestamp` |
+| daily TVL series | [`lib/data/graph.ts:269`](lib/data/graph.ts#L269) `POOL_DAYS_QUERY` | v3 subgraph — `poolDayDatas`, whose trough answers §4 |
+| best pool for a pair | [`lib/data/graph.ts:337`](lib/data/graph.ts#L337) `getBestPoolForPair` | v3 subgraph — ranks fee tiers before quoting |
+| subgraph deployment | [`lib/data/graph.ts:18-19`](lib/data/graph.ts#L18-L19) | `HMuAwufqZ1YCRmzL2SfHTVkzZovC9VL2UAKhjvRqKiR1`, override with `UNISWAP_V3_BASE_SUBGRAPH_ID` |
+
+Reproduce the quote comparison with `npm run demo:quote`. Findings from the integration are in
+[FEEDBACK.md](FEEDBACK.md).
+
 ## Receipts
 
 Every decision appends one line to `data/receipts.jsonl`:
