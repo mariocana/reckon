@@ -14,7 +14,7 @@ export function appendReceipt(receipt: Receipt, file = RECEIPTS_FILE): void {
   appendFileSync(file, JSON.stringify(receipt, replacer) + "\n");
 }
 
-export function readReceipts(file = RECEIPTS_FILE): Receipt[] {
+export function readReceiptsFile(file = RECEIPTS_FILE): Receipt[] {
   if (!existsSync(file)) return [];
 
   return readFileSync(file, "utf8")
@@ -30,5 +30,9 @@ export function readReceipts(file = RECEIPTS_FILE): Receipt[] {
 }
 
 export function nextReceiptId(file = RECEIPTS_FILE): string {
-  return `rcpt_${String(readReceipts(file).length + 1).padStart(4, "0")}`;
+  return `rcpt_${String(readReceiptsFile(file).length + 1).padStart(4, "0")}`;
+}
+
+export function isLive(file = RECEIPTS_FILE): boolean {
+  return existsSync(file) && readReceiptsFile(file).length > 0;
 }
