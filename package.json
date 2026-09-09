@@ -10,6 +10,17 @@
     "demo:evaluate": "tsx --env-file=.env scripts/evaluate-demo.ts",
     "typecheck": "tsc --noEmit",
     "spike:aqua": "tsx --env-file=.env scripts/spike-aqua.ts",
+    "test:aqua-encoding": "tsx scripts/test-aqua-encoding.ts",
+    "spike:aqua-order": "tsx --env-file=.env scripts/spike-aqua-order.ts",
+    "spike:aqua-revert": "tsx --env-file=.env scripts/spike-aqua-revert.ts",
+    "demo:risk": "tsx --env-file=.env scripts/risk-demo.ts",
+    "demo:quote": "tsx --env-file=.env scripts/quote-demo.ts",
+    "demo:policy": "tsx --env-file=.env scripts/policy-demo.ts",
+    "privy:setup": "tsx --env-file=.env scripts/privy-setup.ts",
+    "test:policy": "tsx --env-file=.env scripts/policy-test.ts",
+    "fork:fund": "tsx --env-file=.env scripts/fork-fund.ts",
+    "fork:swap": "tsx --env-file=.env scripts/fork-swap.ts",
+    "run:cycle": "tsx --env-file=.env scripts/run-cycle.ts"
   },
   "dependencies": {
     "@privy-io/node": "^0.34.0",
@@ -30,5 +41,7 @@
     "tsx": "^4.23.13",
     "typescript": "^5"
   },
-  "description": "An agent that manages a treasury under a signed mandate it cannot forge."
+  "description": "An agent that manages a treasury under a signed mandate it cannot forge.",
+  "type": "module",
+  "license": "MIT"
 }
