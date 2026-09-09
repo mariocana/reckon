@@ -8,6 +8,8 @@ import type { Signer } from "@/lib/exec/venue";
 import { appendReceipt, nextReceiptId } from "@/lib/receipts/store";
 import type { Authorization, Execution, Observation, Receipt } from "@/lib/receipts/types";
 import type { ProposedAction, TokenRisk } from "@/lib/types";
+import { verifyOverride, type SignedOverride } from "@/lib/mandate/override";
+import { compileMandateToPolicy, type CompileOptions } from "@/lib/exec/privy";
 
 const erc20 = parseAbi([
   "function allowance(address owner, address spender) view returns (uint256)",
@@ -26,6 +28,16 @@ export interface CycleInput {
   spendToken: Address;
   lastTradeAt?: Date;
   persist?: boolean;
+  override?: SignedOverride;
+  policyAdmin?: PolicyAdmin;
+}
+
+export interface PolicyAdmin {
+  walletId: string;
+  basePolicyId: string;
+  compileOptions: CompileOptions;
+  createPolicy(input: { name: string; chain_type: "ethereum"; version: "1.0"; rules: unknown[] }): Promise<string>;
+  attachPolicy(walletId: string, policyIds: string[]): Promise<void>;
 }
 
 export async function runCycle(input: CycleInput): Promise<Receipt> {
@@ -74,6 +86,8 @@ export async function runCycle(input: CycleInput): Promise<Receipt> {
   };
   let execution: Execution | null = null;
 
+  let widened = false;
+
   if (verdict.kind === "escalate") {
     authorization = {
       layer: "human-escalation",
@@ -81,9 +95,55 @@ export async function runCycle(input: CycleInput): Promise<Receipt> {
       signer: mandate.owner,
       detail: "beyond the mandate — the owner has to authorise it",
     };
+
+    if (input.override) {
+      const check = await verifyOverride(
+        input.override,
+        mandate,
+        mandateHash(mandate),
+        proposal,
+        new Date()
+      );
+
+      if (!check.ok) {
+        authorization = {
+          layer: "human-escalation",
+          outcome: "refused",
+          signer: mandate.owner,
+          detail: `override rejected: ${check.reason}`,
+        };
+      } else if (!input.policyAdmin) {
+        authorization = {
+          layer: "human-escalation",
+          outcome: "refused",
+          signer: mandate.owner,
+          detail: "override is valid but the wallet policy cannot be widened without admin access",
+        };
+      } else {
+        const admin = input.policyAdmin;
+        const compiled = compileMandateToPolicy(mandate, admin.compileOptions, [input.override.override]);
+        const widenedId = await admin.createPolicy({
+          name: compiled.name,
+          chain_type: compiled.chain_type,
+          version: compiled.version,
+          rules: compiled.rules,
+        });
+        await admin.attachPolicy(admin.walletId, [widenedId]);
+        widened = true;
+
+        authorization = {
+          layer: "human-escalation",
+          outcome: "granted",
+          signer: mandate.owner,
+          detail: `override ${check.hash.slice(0, 14)}… signed by the owner; policy widened for this action`,
+        };
+      }
+    }
   }
 
-  if (verdict.kind === "allow") {
+  const shouldExecute = verdict.kind === "allow" || widened;
+
+  if (shouldExecute) {
     const decimals = await client.readContract({
       address: spendToken,
       abi: erc20,
@@ -111,15 +171,17 @@ export async function runCycle(input: CycleInput): Promise<Receipt> {
 
       const result = await venue.execute(quote, signer);
 
-      authorization = {
-        layer: "privy-policy",
-        outcome: "granted",
-        signer: signer.address,
-        detail:
-          allowance < sellAmount
-            ? "the policy allowed the approval and the swap"
-            : "the policy allowed the swap",
-      };
+      if (!widened) {
+        authorization = {
+          layer: "privy-policy",
+          outcome: "granted",
+          signer: signer.address,
+          detail:
+            allowance < sellAmount
+              ? "the policy allowed the approval and the swap"
+              : "the policy allowed the swap",
+        };
+      }
 
       execution = {
         venue: "uniswap",
@@ -133,13 +195,19 @@ export async function runCycle(input: CycleInput): Promise<Receipt> {
     } catch (error) {
       const message = String((error as Error).message).split("\n")[0];
       authorization = {
-        layer: "privy-policy",
+        layer: widened ? "human-escalation" : "privy-policy",
         outcome: "refused",
         signer: signer.address,
         detail: /policy_violation/i.test(message)
           ? "the wallet policy refused to sign"
           : message.slice(0, 160),
       };
+    } finally {
+      if (widened && input.policyAdmin) {
+        await input.policyAdmin.attachPolicy(input.policyAdmin.walletId, [
+          input.policyAdmin.basePolicyId,
+        ]);
+      }
     }
   }
 

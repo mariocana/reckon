@@ -1,5 +1,6 @@
 import type { Address, Hex } from "viem";
 import type { Mandate } from "@/lib/mandate/schema";
+import type { Override } from "@/lib/mandate/override";
 import { UNISWAP_ADDRESSES } from "./uniswap";
 import { VenueError, type Signer } from "./venue";
 
@@ -65,7 +66,8 @@ function maxSpendUnits(mandate: Mandate, decimals: number): bigint {
 
 export function compileMandateToPolicy(
   mandate: Mandate,
-  options: CompileOptions
+  options: CompileOptions,
+  overrides: Override[] = []
 ): CompiledPolicy {
   const routers = mandate.clauses.venues.allowed
     .map((v) => VENUE_ROUTERS[v])
@@ -125,8 +127,37 @@ export function compileMandateToPolicy(
     },
   ]);
 
+  for (const [index, o] of overrides.entries()) {
+    const cap = BigInt(Math.floor(o.maxAmountUsd * 10 ** options.spendTokenDecimals));
+    for (const method of signingMethods) {
+      rules.push({
+        name: `override ${index} (${method})`.slice(0, 49),
+        method,
+        action: "ALLOW",
+        conditions: [
+          { field_source: "ethereum_transaction", field: "chain_id", operator: "eq", value: chainId },
+          { field_source: "ethereum_transaction", field: "to", operator: "in", value: routers },
+          {
+            field_source: "ethereum_calldata",
+            abi: EXACT_INPUT_SINGLE_ABI,
+            field: "exactInputSingle.params.tokenOut",
+            operator: "eq",
+            value: o.token,
+          },
+          {
+            field_source: "ethereum_calldata",
+            abi: EXACT_INPUT_SINGLE_ABI,
+            field: "exactInputSingle.params.amountIn",
+            operator: "lte",
+            value: cap.toString(),
+          },
+        ],
+      });
+    }
+  }
+
   return {
-    name: `reckon mandate v${mandate.version}`,
+    name: `reckon mandate v${mandate.version}${overrides.length ? ` +${overrides.length}` : ""}`.slice(0, 49),
     chain_type: "ethereum",
     version: "1.0",
     rules,
