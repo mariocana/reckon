@@ -1,3 +1,5 @@
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
 import type { Address } from "viem";
 import type { TokenRisk } from "@/lib/types";
 import {
@@ -14,6 +16,29 @@ export interface RiskOptions {
   windowDays?: number;
   topHolders?: number;
   maxPools?: number;
+  cacheTtlMs?: number;
+  cacheFile?: string;
+  refresh?: boolean;
+}
+
+const CACHE_FILE = process.env.RECKON_RISK_CACHE ?? "data/risk-cache.json";
+const CACHE_TTL_MS = 15 * 60 * 1000;
+
+type CacheEntry = { storedAt: number; evidence: RiskEvidence };
+
+function loadCache(file: string): Record<string, CacheEntry> {
+  if (!existsSync(file)) return {};
+  try {
+    return JSON.parse(readFileSync(file, "utf8")) as Record<string, CacheEntry>;
+  } catch {
+    return {};
+  }
+}
+
+function saveCache(file: string, cache: Record<string, CacheEntry>): void {
+  const dir = dirname(file);
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+  writeFileSync(file, JSON.stringify(cache, null, 2));
 }
 
 export interface RiskEvidence {
@@ -60,6 +85,34 @@ function symbolFromPools(token: Address, pools: PoolSummary[]): string {
 export async function getTokenRisk(
   token: Address,
   options: RiskOptions = {}
+): Promise<RiskEvidence> {
+  const cacheFile = options.cacheFile ?? CACHE_FILE;
+  const ttl = options.cacheTtlMs ?? CACHE_TTL_MS;
+  const key = token.toLowerCase();
+  const cache = loadCache(cacheFile);
+  const hit = cache[key];
+
+  if (!options.refresh && hit && Date.now() - hit.storedAt < ttl) {
+    return hit.evidence;
+  }
+
+  try {
+    const fresh = await fetchTokenRisk(token, options);
+    if (fresh.risk.holderConcentrationExContractsPct !== null || !hit) {
+      cache[key] = { storedAt: Date.now(), evidence: fresh };
+      saveCache(cacheFile, cache);
+      return fresh;
+    }
+    return hit.evidence;
+  } catch (error) {
+    if (hit) return hit.evidence;
+    throw error;
+  }
+}
+
+async function fetchTokenRisk(
+  token: Address,
+  options: RiskOptions
 ): Promise<RiskEvidence> {
   const windowDays = options.windowDays ?? 30;
   const topN = options.topHolders ?? 10;
