@@ -22,9 +22,11 @@
     "fork:swap": "tsx --env-file=.env scripts/fork-swap.ts",
     "run:cycle": "tsx --env-file=.env scripts/run-cycle.ts",
     "fork": "pkill -f \"anvil --fork-url\" 2>/dev/null; set -a && . ./.env && set +a && anvil --fork-url $BASE_RPC_URL --port 8545",
-    "fork:stop": "pkill -f \"anvil --fork-url\" && echo fork stopped"
+    "fork:stop": "pkill -f \"anvil --fork-url\" && echo fork stopped",
+    "demo:plan": "tsx --env-file=.env scripts/plan-demo.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.124.0",
     "@privy-io/node": "^0.34.0",
     "next": "16.3.4",
     "react": "19.2.8",
