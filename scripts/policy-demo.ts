@@ -9,7 +9,7 @@ const cbBTC = "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf" as Address;
 const mandate: Mandate = mandateSchema.parse({
   version: 1,
   owner: "0x1111111111111111111111111111111111111111",
-  agent: "0x2222222222222222222222222222222222222222",
+  agent: (process.env.PRIVY_WALLET_ADDRESS ?? "0x2222222222222222222222222222222222222222") as Address,
   chainId: 8453,
   issuedAt: "2026-09-07T00:00:00.000Z",
   expiresAt: "2026-12-31T00:00:00.000Z",
