@@ -1,23 +1,23 @@
 [
   {
     "id": "rcpt_0001",
-    "createdAt": "2026-09-09T12:27:18.907Z",
+    "createdAt": "2026-09-09T16:39:07.753Z",
     "mandateHash": "0xe20d444e4fecdd0d8d1de4eec6ebc43fc503345ce151a16d999dd43a5f917f46",
     "trigger": "weekly rebalance: WETH is underweight",
     "observation": {
       "source": "thegraph",
-      "queriedAt": "2026-09-09T12:27:14.169Z",
+      "queriedAt": "2026-09-09T16:38:08.877Z",
       "risk": {
         "token": "0x4200000000000000000000000000000000000006",
         "symbol": "WETH",
         "firstSeenAt": "2023-08-07T16:07:29.000Z",
-        "ageDays": 1128.8441319444444,
-        "sustainedLiquidityUsd": 154989899.88085005,
-        "holderConcentrationPct": 52.57616480121421,
-        "holderConcentrationExContractsPct": 0.9327835193946024,
+        "ageDays": 1128.8551273148148,
+        "sustainedLiquidityUsd": 154875064.47704414,
+        "holderConcentrationPct": 52.20145017285588,
+        "holderConcentrationExContractsPct": 0.9320077358780561,
         "contractsInTopHolders": 9,
         "source": "thegraph",
-        "queriedAt": "2026-09-09T12:23:27.202Z"
+        "queriedAt": "2026-09-09T12:39:28.204Z"
       },
       "poolsSeen": 20,
       "bestPoolTvlUsd": 33998209976.017776
@@ -51,37 +51,37 @@
     },
     "execution": {
       "venue": "uniswap",
-      "txHash": "0x9532e7e4792c945e2346f64e6d68d3d2b8e2b727675fbc2a129acb2c21937149",
+      "txHash": "0x8fec40547f145b79745410bd3300810b0ba3d4e468074e79edce3dbd06c50871",
       "feeTier": 100,
       "sellAmount": "5000000",
-      "buyAmount": "2000050557582520",
-      "minBuyAmount": "1980050052006694",
+      "buyAmount": "2002462354042965",
+      "minBuyAmount": "1982437730502535",
       "status": "success"
     },
     "outcome": null
   },
   {
     "id": "rcpt_0002",
-    "createdAt": "2026-09-09T12:27:20.932Z",
+    "createdAt": "2026-09-09T16:39:29.353Z",
     "mandateHash": "0xe20d444e4fecdd0d8d1de4eec6ebc43fc503345ce151a16d999dd43a5f917f46",
     "trigger": "flagged by the community",
     "observation": {
       "source": "thegraph",
-      "queriedAt": "2026-09-09T12:27:20.930Z",
+      "queriedAt": "2026-09-09T16:39:29.351Z",
       "risk": {
         "token": "0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed",
         "symbol": "DEGEN",
         "firstSeenAt": "2024-01-07T19:30:45.000Z",
-        "ageDays": 975.7020833333333,
-        "sustainedLiquidityUsd": 493863.37098352145,
-        "holderConcentrationPct": 61.42254428944632,
-        "holderConcentrationExContractsPct": 21.87963565961946,
+        "ageDays": 975.8810416666666,
+        "sustainedLiquidityUsd": 493160.8425527177,
+        "holderConcentrationPct": 61.37144680735932,
+        "holderConcentrationExContractsPct": 21.828538177532458,
         "contractsInTopHolders": 5,
         "source": "thegraph",
-        "queriedAt": "2026-09-09T12:21:47.250Z"
+        "queriedAt": "2026-09-09T16:39:29.348Z"
       },
       "poolsSeen": 20,
-      "bestPoolTvlUsd": 1046498.3922234576
+      "bestPoolTvlUsd": 1045926.4766960992
     },
     "proposal": {
       "kind": "buy",
@@ -107,8 +107,8 @@
         {
           "clause": "\u00a74.universe",
           "severity": "hard",
-          "explain": "DEGEN liquidity fell to $493,863.37 within the window \u2014 thinner than the mandate allows.",
-          "observed": "$493,863.37",
+          "explain": "DEGEN liquidity fell to $493,160.84 within the window \u2014 thinner than the mandate allows.",
+          "observed": "$493,160.84",
           "limit": ">= $2,000,000"
         }
       ]
@@ -124,23 +124,23 @@
   },
   {
     "id": "rcpt_0003",
-    "createdAt": "2026-09-09T12:27:22.938Z",
+    "createdAt": "2026-09-09T16:40:08.551Z",
     "mandateHash": "0xe20d444e4fecdd0d8d1de4eec6ebc43fc503345ce151a16d999dd43a5f917f46",
     "trigger": "realignment past the concentration ceiling",
     "observation": {
       "source": "thegraph",
-      "queriedAt": "2026-09-09T12:27:22.937Z",
+      "queriedAt": "2026-09-09T16:40:08.550Z",
       "risk": {
         "token": "0x4200000000000000000000000000000000000006",
         "symbol": "WETH",
         "firstSeenAt": "2023-08-07T16:07:29.000Z",
-        "ageDays": 1128.8441319444444,
+        "ageDays": 1129.0224305555555,
         "sustainedLiquidityUsd": 154989899.88085005,
-        "holderConcentrationPct": 52.57616480121421,
-        "holderConcentrationExContractsPct": 0.9327835193946024,
+        "holderConcentrationPct": 52.61833805271488,
+        "holderConcentrationExContractsPct": 0.9270503433003181,
         "contractsInTopHolders": 9,
         "source": "thegraph",
-        "queriedAt": "2026-09-09T12:23:27.202Z"
+        "queriedAt": "2026-09-09T16:40:08.549Z"
       },
       "poolsSeen": 20,
       "bestPoolTvlUsd": 33998209976.017776
@@ -186,23 +186,23 @@
   },
   {
     "id": "rcpt_0004",
-    "createdAt": "2026-09-09T12:27:28.633Z",
+    "createdAt": "2026-09-09T16:40:17.862Z",
     "mandateHash": "0xe20d444e4fecdd0d8d1de4eec6ebc43fc503345ce151a16d999dd43a5f917f46",
     "trigger": "realignment, with the owner's signature",
     "observation": {
       "source": "thegraph",
-      "queriedAt": "2026-09-09T12:27:24.932Z",
+      "queriedAt": "2026-09-09T16:40:11.826Z",
       "risk": {
         "token": "0x4200000000000000000000000000000000000006",
         "symbol": "WETH",
         "firstSeenAt": "2023-08-07T16:07:29.000Z",
-        "ageDays": 1128.8441319444444,
+        "ageDays": 1129.0224305555555,
         "sustainedLiquidityUsd": 154989899.88085005,
-        "holderConcentrationPct": 52.57616480121421,
-        "holderConcentrationExContractsPct": 0.9327835193946024,
+        "holderConcentrationPct": 52.61833805271488,
+        "holderConcentrationExContractsPct": 0.9270503433003181,
         "contractsInTopHolders": 9,
         "source": "thegraph",
-        "queriedAt": "2026-09-09T12:23:27.202Z"
+        "queriedAt": "2026-09-09T16:40:08.549Z"
       },
       "poolsSeen": 20,
       "bestPoolTvlUsd": 33998209976.017776
@@ -241,15 +241,15 @@
       "layer": "human-escalation",
       "outcome": "granted",
       "signer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-      "detail": "override 0x2edd68e9ba4d\u2026 signed by the owner; policy widened for this action"
+      "detail": "override 0x636e19796bc8\u2026 signed by the owner; policy widened for this action"
     },
     "execution": {
       "venue": "uniswap",
-      "txHash": "0x6f8c4dc01ac2e42f1e38e0ce130af56f0135a075c16c4711d7321cf26532484b",
+      "txHash": "0x065cd7cafa978ee6324e1f39f680217fb0924b1eb7395b6df4e8b7ed931138c4",
       "feeTier": 100,
       "sellAmount": "12000000",
-      "buyAmount": "4800100998023022",
-      "minBuyAmount": "4752099988042791",
+      "buyAmount": "4805890605984172",
+      "minBuyAmount": "4757831699924330",
       "status": "success"
     },
     "outcome": null

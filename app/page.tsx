@@ -126,13 +126,26 @@ export default async function Page({ searchParams }: PageProps<"/">) {
     .reverse();
 
   const executed = receipts.filter((r: Receipt) => r.execution).length;
-  const denied = receipts.filter((r: Receipt) => r.verdict.kind === "deny").length;
-  const escalated = receipts.filter((r: Receipt) => r.verdict.kind === "escalate").length;
+  const denied = receipts.filter((r: Receipt) => !r.execution && r.verdict.kind === "deny").length;
+  const awaiting = receipts.filter(
+    (r: Receipt) => !r.execution && r.authorization.outcome === "pending"
+  ).length;
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-14">
       <header className="mb-10">
-        <h1 className="text-2xl font-semibold tracking-tight">reckon</h1>
+        <div className="flex items-center gap-2.5">
+          <svg viewBox="0 0 48 48" className="h-7 w-7 shrink-0" fill="currentColor" aria-hidden="true">
+            <rect x="4" y="6" width="4.5" height="36" rx="2.25" />
+            <rect x="39.5" y="6" width="4.5" height="36" rx="2.25" />
+            <rect x="4" y="6" width="14" height="4.5" rx="2.25" />
+            <rect x="4" y="37.5" width="14" height="4.5" rx="2.25" />
+            <rect x="30" y="6" width="14" height="4.5" rx="2.25" />
+            <rect x="30" y="37.5" width="14" height="4.5" rx="2.25" />
+            <circle cx="24" cy="24" r="7" />
+          </svg>
+          <h1 className="text-2xl font-semibold tracking-tight">reckon</h1>
+        </div>
         <p className="mt-1.5 text-sm text-muted max-w-lg">
           An agent that manages a treasury under a signed mandate it cannot forge. Every
           decision leaves a receipt: what it saw, what it wanted to do, and who let it.
@@ -145,7 +158,7 @@ export default async function Page({ searchParams }: PageProps<"/">) {
         {[
           { label: "executed", value: executed, tone: "text-allow" },
           { label: "denied", value: denied, tone: "text-deny" },
-          { label: "escalated", value: escalated, tone: "text-escalate" },
+          { label: "awaiting the owner", value: awaiting, tone: "text-escalate" },
         ].map((s) => (
           <div key={s.label} className="bg-panel px-5 py-4">
             <div className={`text-2xl font-semibold tabular-nums ${s.tone}`}>{s.value}</div>
