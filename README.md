@@ -12,6 +12,10 @@ realignment past the concentration ceiling   → escalated §2    the owner has 
 same action, with the owner's signature      → executed        policy widened, then restored
 ```
 
+> **Scope, up front:** there is no model in the loop yet. reckon is the layer that constrains an
+> agent — the clause evaluator, the wallet policy, the signed override — and the proposals it judges
+> are fixtures, not model output. See [What is not built yet](#what-is-not-built-yet).
+
 ## The problem
 
 Delegating capital to an agent means trusting it not to do something stupid at 3am. Today that trust rests on the agent's own code — an `if` statement it could be argued out of, a prompt it could be talked around.
@@ -133,6 +137,7 @@ Privy still signs every transaction, so the policy is genuinely exercised — re
 | `npm run demo:risk [token]` | §4 inputs for a token, straight from The Graph |
 | `npm run demo:quote` | Uniswap quotes across all fee tiers |
 | `npm run demo:policy` | the Privy policy JSON compiled from the mandate |
+| `npm run demo:plan` | asks Claude for one action, then puts it through the evaluator (needs `ANTHROPIC_API_KEY`, untested) |
 | `npm run demo:evaluate` | the evaluator against fixtures — allow, deny, escalate |
 | `npm run privy:setup` | creates the agent wallet and installs the mandate policy |
 | `npm run test:aqua-encoding` | 25 assertions over the SwapVM taker encoder |
@@ -181,6 +186,45 @@ RECKON_RISK_CACHE      defaults to data/risk-cache.json
 ```
 
 The gateway key and the Token API JWT are **different credentials**. A Graph Studio key returns 401 against the Token API.
+
+## What is not built yet
+
+Being straight about this, because the word "agent" is doing work the code only partly earns.
+
+**The planner exists but has never run.** `lib/agent/plan.ts` is written: it takes the mandate, the
+portfolio and the §4 facts from The Graph, asks Claude for one action with its reasoning, and
+validates the answer before returning a `ProposedAction`. It needs `ANTHROPIC_API_KEY`, and at the
+time of writing it had not been executed once — no key was available. Treat it as untested code.
+
+```bash
+npm run demo:plan     # needs ANTHROPIC_API_KEY
+```
+
+**It is not wired into the cycle.** `runCycle` still takes the proposal it is handed, and the four
+scenarios in `lib/agent/demo.ts` are fixtures — hand-written, including their rationales. So the
+demo you can reproduce today evaluates proposals a human wrote, not proposals a model made.
+Connecting the two is one call site in `lib/agent/demo.ts`.
+
+What is real is everything downstream of the proposal: the clause evaluator, the compilation of a
+mandate into a Privy wallet policy, the historical risk data from The Graph, the Uniswap execution,
+and the owner's signed override. Those were built and verified end to end — the policy genuinely
+refuses to sign, the swaps genuinely happen.
+
+So the honest description is: this is the layer that constrains an agent, with a decision-maker
+sketched in but not yet plugged in or exercised.
+
+Wiring it in would make the central demo stronger, not weaker. Today the DEGEN refusal uses a bad
+proposal written on purpose. With the planner live, the model weighs a "trending on socials" signal
+against thirty days of liquidity history and either reaches for the memecoin — and §4 stops it — or
+declines on its own. Either outcome is a better story than a fixture, because nobody put a thumb on
+the scale.
+
+Two smaller gaps:
+
+- Receipts carry an `outcome` field for realised P&L that is never populated. Marking positions to
+  market is what would turn the receipt log into a track record.
+- Nothing runs on a schedule. Deployed, the dashboard is a read-only ledger of a recorded run; the
+  cycle is triggered by hand or through the demo endpoint.
 
 ## Layout
 
