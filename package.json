@@ -20,7 +20,9 @@
     "test:policy": "tsx --env-file=.env scripts/policy-test.ts",
     "fork:fund": "tsx --env-file=.env scripts/fork-fund.ts",
     "fork:swap": "tsx --env-file=.env scripts/fork-swap.ts",
-    "run:cycle": "tsx --env-file=.env scripts/run-cycle.ts"
+    "run:cycle": "tsx --env-file=.env scripts/run-cycle.ts",
+    "fork": "pkill -f \"anvil --fork-url\" 2>/dev/null; set -a && . ./.env && set +a && anvil --fork-url $BASE_RPC_URL --port 8545",
+    "fork:stop": "pkill -f \"anvil --fork-url\" && echo fork stopped"
   },
   "dependencies": {
     "@privy-io/node": "^0.34.0",
