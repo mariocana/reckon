@@ -33,7 +33,7 @@ async function rpc(url: string, method: string, params: unknown[]) {
 const isTenderly = ADMIN.includes("tenderly.co");
 const hex = (v: bigint) => `0x${v.toString(16)}`;
 
-console.log(`fork    ${isTenderly ? "Tenderly Virtual TestNet" : "anvil"} @ blocco ${await client.getBlockNumber()}`);
+console.log(`fork    ${isTenderly ? "Tenderly Virtual TestNet" : "anvil"} @ block ${await client.getBlockNumber()}`);
 console.log(`chain   ${await client.getChainId()}`);
 console.log(`target  ${target}\n`);
 
@@ -43,17 +43,42 @@ if (isTenderly) {
   for (const token of RESET_TO_ZERO) {
     await rpc(ADMIN, "tenderly_setErc20Balance", [token, [target], "0x0"]);
   }
-  console.log("ETH     1.0 per il gas");
-  console.log("USDC    scritto direttamente in storage");
-  console.log(`azzerati ${RESET_TO_ZERO.length} token non-stable, il portafoglio riparte pulito`);
+  console.log("ETH     1.0 for gas");
+  console.log("USDC    written straight to storage");
+  console.log(`cleared ${RESET_TO_ZERO.length} non-stable tokens, the portfolio starts clean`);
 } else {
   await rpc(ADMIN, "anvil_setBalance", [target, hex(10n ** 18n)]);
-  console.log("ETH     1.0 per il gas");
+  console.log("ETH     1.0 for gas");
 
-  const holders = await getTopHolders(USDC, 10);
+  const KNOWN_DONORS: Address[] = ["0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb"];
+
+  let candidates: Address[] = KNOWN_DONORS;
   let donor: Address | undefined;
 
-  for (const h of holders) {
+  for (const a of KNOWN_DONORS) {
+    const balance = await client.readContract({
+      address: USDC,
+      abi: erc20,
+      functionName: "balanceOf",
+      args: [a],
+    });
+    if (balance >= wantUsdc) {
+      donor = a;
+      console.log(`donor    ${a} holds ${formatUnits(balance, 6)} USDC`);
+      break;
+    }
+  }
+
+  if (!donor) {
+    try {
+      candidates = (await getTopHolders(USDC, 10)).map((h) => h.address);
+    } catch {
+      console.log("the Token API is down and no known donor has enough USDC");
+      process.exit(1);
+    }
+  }
+
+  for (const h of donor ? [] : candidates.map((address) => ({ address }))) {
     const balance = await client.readContract({
       address: USDC,
       abi: erc20,
@@ -62,13 +87,13 @@ if (isTenderly) {
     });
     if (balance >= wantUsdc) {
       donor = h.address;
-      console.log(`donatore ${h.address} ha ${formatUnits(balance, 6)} USDC`);
+      console.log(`donor    ${h.address} holds ${formatUnits(balance, 6)} USDC`);
       break;
     }
   }
 
   if (!donor) {
-    console.log("nessun holder con saldo sufficiente sul fork");
+    console.log("no holder on the fork has enough USDC");
     process.exit(1);
   }
 
@@ -110,7 +135,7 @@ if (isTenderly) {
   }
 
   await rpc(ADMIN, "anvil_stopImpersonatingAccount", [target]);
-  console.log(`azzerati ${cleared} token non-stable, il portafoglio riparte pulito`);
+  console.log(`cleared ${cleared} non-stable tokens, the portfolio starts clean`);
 }
 
 const final = await client.readContract({
@@ -120,4 +145,4 @@ const final = await client.readContract({
   args: [target],
 });
 
-console.log(`USDC    ${formatUnits(final, 6)} sul wallet`);
+console.log(`USDC    ${formatUnits(final, 6)} on the wallet`);

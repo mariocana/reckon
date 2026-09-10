@@ -48,7 +48,7 @@ try {
     console.error(`${error.message}`);
     if (!process.env.GRAPH_API_KEY) {
       console.error(`\nServe una chiave: https://thegraph.com/studio → API Keys`);
-      console.error(`Poi: echo 'GRAPH_API_KEY=...' >> .env`);
+      console.error(`Then: echo 'GRAPH_API_KEY=...' >> .env`);
     }
     process.exit(1);
   }
@@ -58,16 +58,16 @@ try {
 const { risk, pools, liquidityByDay, circulatingSupply, concentrationUnavailable, concentrationExcludingContractsPct, contractHolders } = evidence;
 
 console.log(`${risk.symbol}  ${token}`);
-console.log(`  prima pool     ${risk.firstSeenAt.slice(0, 10)}  (${risk.ageDays.toFixed(0)} giorni)`);
-console.log(`  pool trovate   ${pools.length}, TVL massima $${pools[0].totalValueLockedUSD.toLocaleString("en-US", { maximumFractionDigits: 0 })}`);
-console.log(`  liquidità min  $${risk.sustainedLiquidityUsd.toLocaleString("en-US", { maximumFractionDigits: 0 })} su ${liquidityByDay.length} giorni`);
+console.log(`  first pool     ${risk.firstSeenAt.slice(0, 10)}  (${risk.ageDays.toFixed(0)} days old)`);
+console.log(`  pools found    ${pools.length}, deepest TVL $${pools[0].totalValueLockedUSD.toLocaleString("en-US", { maximumFractionDigits: 0 })}`);
+console.log(`  trough liq.    $${risk.sustainedLiquidityUsd.toLocaleString("en-US", { maximumFractionDigits: 0 })} across ${liquidityByDay.length} days`);
 if (risk.holderConcentrationPct !== null && circulatingSupply !== null) {
-  console.log(`  top 10 holder  ${risk.holderConcentrationPct.toFixed(2)}% di ${circulatingSupply.toLocaleString("en-US", { maximumFractionDigits: 0 })}`);
+  console.log(`  top 10 holders ${risk.holderConcentrationPct.toFixed(2)}% of ${circulatingSupply.toLocaleString("en-US", { maximumFractionDigits: 0 })}`);
   if (concentrationExcludingContractsPct !== null) {
-    console.log(`  di cui non-contratti  ${concentrationExcludingContractsPct.toFixed(2)}%  (${contractHolders}/10 sono contratti)`);
+    console.log(`  wallets only   ${concentrationExcludingContractsPct.toFixed(2)}%  (${contractHolders} of the top 10 are contracts)`);
   }
 } else {
-  console.log(`  top 10 holder  non misurata — ${concentrationUnavailable}`);
+  console.log(`  top 10 holders not measured — ${concentrationUnavailable}`);
 }
 
 const action: ProposedAction = {
@@ -76,7 +76,7 @@ const action: ProposedAction = {
   symbol: risk.symbol,
   amountUsd: 400,
   venue: "uniswap",
-  rationale: "Test del percorso §4 con dati reali da The Graph.",
+  rationale: "Testing the §4 path against live Graph data.",
 };
 
 const verdict = evaluate(mandate, action, {
@@ -87,14 +87,14 @@ const verdict = evaluate(mandate, action, {
   lastTradeAt: new Date(Date.now() - 7200_000),
 });
 
-console.log(`\n${action.kind} $${action.amountUsd} ${action.symbol} su ${action.venue}`);
+console.log(`\n${action.kind} $${action.amountUsd} ${action.symbol} on ${action.venue}`);
 console.log(`  → ${describeVerdict(verdict)}`);
 
 if (verdict.kind !== "allow") {
   for (const v of verdict.violations) {
     console.log(`     ${v.clause} [${v.severity}] ${v.explain}`);
-    console.log(`        osservato ${v.observed}, ammesso ${v.limit}`);
+    console.log(`        observed ${v.observed}, allowed ${v.limit}`);
   }
 }
 
-console.log(`  mandato ${verdict.mandateHash}`);
+console.log(`  mandate ${verdict.mandateHash}`);

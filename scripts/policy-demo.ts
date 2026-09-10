@@ -24,7 +24,7 @@ const mandate: Mandate = mandateSchema.parse({
 } satisfies Mandate);
 
 console.log(describeTerms(mandate));
-console.log(`\nmandato ${mandateHash(mandate)}\n`);
+console.log(`\nmandate ${mandateHash(mandate)}\n`);
 
 const policy = compileMandateToPolicy(mandate, {
   tokenAllowlist: [USDC, WETH, cbBTC],
@@ -33,5 +33,5 @@ const policy = compileMandateToPolicy(mandate, {
 });
 
 console.log(JSON.stringify({ name: policy.name, chain_type: policy.chain_type, version: policy.version, rules: policy.rules }, null, 2));
-console.log(`\ncosa non entra nella policy:`);
+console.log(`\nwhat cannot be expressed per-transaction:`);
 for (const n of policy.notes) console.log(`  - ${n}`);

@@ -21,7 +21,7 @@ const mandate = demoMandate(agent);
 const order: ScenarioId[] = ["rebalance", "memecoin", "oversized", "authorised"];
 
 console.log(describeTerms(mandate));
-console.log(`\nportafoglio`);
+console.log(`\nportfolio`);
 console.log(formatPortfolio(await readPortfolio(client, agent, TRACKED, TOKENS.USDC)));
 
 function report(receipt: Receipt) {
@@ -32,8 +32,8 @@ function report(receipt: Receipt) {
     const liq = (risk.sustainedLiquidityUsd / 1e6).toFixed(1);
     const wallets = risk.holderConcentrationExContractsPct?.toFixed(2) ?? "?";
     console.log(
-      `  visto      ${risk.ageDays.toFixed(0)}g, liquidità min $${liq}M, wallet ${wallets}%  ` +
-        `(${receipt.observation.poolsSeen} pool)`
+      `  observed   ${risk.ageDays.toFixed(0)}d old, trough liq $${liq}M, wallets ${wallets}%  ` +
+        `(${receipt.observation.poolsSeen} pools)`
     );
   }
 
@@ -44,9 +44,9 @@ function report(receipt: Receipt) {
   }
 
   const a = receipt.authorization;
-  console.log(`  autorizza  ${a.layer} → ${a.outcome}: ${a.detail}`);
-  if (receipt.execution) console.log(`  eseguito   ${receipt.execution.txHash}`);
-  console.log(`  ricevuta   ${receipt.id}  mandato ${receipt.mandateHash.slice(0, 14)}…`);
+  console.log(`  authorised ${a.layer} → ${a.outcome}: ${a.detail}`);
+  if (receipt.execution) console.log(`  executed   ${receipt.execution.txHash}`);
+  console.log(`  receipt    ${receipt.id}  mandate ${receipt.mandateHash.slice(0, 14)}…`);
 }
 
 for (const id of order) {
@@ -68,5 +68,5 @@ for (const id of order) {
   report(await runScenario(id, signed));
 }
 
-console.log(`\nportafoglio finale`);
+console.log(`\nfinal portfolio`);
 console.log(formatPortfolio(await readPortfolio(client, agent, TRACKED, TOKENS.USDC)));
